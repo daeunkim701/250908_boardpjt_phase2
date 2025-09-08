@@ -1,6 +1,9 @@
 package com.example.boardpjt.controller;
 
+import com.example.boardpjt.model.entity.RefreshToken;
+import com.example.boardpjt.model.repository.RefreshTokenRepository;
 import com.example.boardpjt.service.UserAccountService;
+import com.example.boardpjt.util.CookieUtil;
 import com.example.boardpjt.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -94,6 +97,8 @@ public class AuthController {
         return "login";
     }
 
+    private final RefreshTokenRepository refreshTokenRepository;
+
     /**
      * 로그인 처리 메서드
      * POST 요청으로 전송된 로그인 정보를 받아서 인증을 처리하고 JWT 토큰을 발급
@@ -128,14 +133,13 @@ public class AuthController {
 
             // === HTTP 쿠키로 토큰 저장 단계 ===
             // JWT 토큰을 HTTP 쿠키로 생성 (보안 설정 포함)
-            ResponseCookie cookie = ResponseCookie.from("access_token", accessToken)
-                    .httpOnly(true) // XSS 공격 방지 (JavaScript에서 접근 불가)
-                    .path("/") // 쿠키가 유효한 경로 (전체 도메인)
-                    .maxAge(3600) // 쿠키 유효기간 (3600초 = 1시간) 주의: 초 단위임
-                    .build();
 
-            // HTTP 응답 헤더에 "Set-Cookie" 추가하여 클라이언트에 쿠키 전송
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            CookieUtil.createCookie(response, "access_token", accessToken, 60 * 60); // 1시간
+
+            // RefreshToken 생성하여 저장 후 쿠키로 전달
+            String refreshToken = jwtUtil.generateToken(username, authentication.getAuthorities().toString(), true); // Refresh의 만료를 따르는 쿠키
+            refreshTokenRepository.save(new RefreshToken(username, refreshToken));
+            CookieUtil.createCookie(response, "refresh_token", refreshToken, 60 * 60 * 24 * 7); // 7일
 
             // === 로그인 성공 후 리다이렉트 ===
             // 인증 완료 후 마이페이지로 이동
@@ -143,11 +147,27 @@ public class AuthController {
 
         } catch (Exception e) {
             // === 로그인 실패 처리 ===
-            // 인증 실패 시 (잘못된 사용자명/비밀번호, 계정 비활성화 등)
-            redirectAttributes.addFlashAttribute("error", "로그인 실패");
+            String errorMessage = e.getMessage(); // 발생한 예외 메시지 가져오기
 
-            // 에러 메시지와 함께 로그인 페이지로 다시 리다이렉트
+            // 인증 실패 메시지 저장
+            redirectAttributes.addFlashAttribute("error", "로그인 실패: " + errorMessage);
+
+            // 로그인 페이지로 다시 리다이렉트
             return "redirect:/auth/login";
         }
     }
+    // 로그아웃
+    @PostMapping("/logout") // /auth/logout
+    public String logout(HttpServletResponse response) {
+        // 비어있는 쿠키를 줘야함
+        // 쿠키를 제거해야함 // 엄밀히 말하면 쿠키를 삭제하는 건 불가능하대. 그냥 빈 걸로 덮어씌운다는 게 더 정확한 표현이래
+        CookieUtil.deleteCookie(response, "access_token");
+        CookieUtil.deleteCookie(response, "refresh_token");
+        // refreshTokenRepository.deleteById(authentication.getName());
+        return "redirect:/"; // 모두가 접속 가능
+        // return "redirect:/login"; // 다른 계정으로 로그인할 수 있게 하는 정책
+
+
+    }
+
 }

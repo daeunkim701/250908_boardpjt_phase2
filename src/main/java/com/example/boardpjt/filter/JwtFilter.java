@@ -1,5 +1,6 @@
 package com.example.boardpjt.filter;
 
+import com.example.boardpjt.util.CookieUtil;
 import com.example.boardpjt.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -46,26 +47,28 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
+        System.out.println("[Jwt Filter]");
         // === 1단계: 쿠키에서 JWT 토큰 추출 ===
-        String token = null;
-
-        // 요청에 쿠키가 있는지 확인
-        if (request.getCookies() != null) {
-            // 모든 쿠키를 순회하면서 "access_token" 이름의 쿠키 찾기
-            for (Cookie c : request.getCookies()) {
-                if (c.getName().equals("access_token")) {
-                    token = c.getValue(); // JWT 토큰 값 추출
-                    break; // 토큰을 찾았으므로 반복 종료
-                }
-            }
-        }
+        String token = CookieUtil.findCookie(request, "access_token");
+//        String token = null;
+//
+//        // 요청에 쿠키가 있는지 확인
+//        if (request.getCookies() != null) {
+//            // 모든 쿠키를 순회하면서 "access_token" 이름의 쿠키 찾기
+//            for (Cookie c : request.getCookies()) {
+//                if (c.getName().equals("access_token")) {
+//                    token = c.getValue(); // JWT 토큰 값 추출
+//                    break; // 토큰을 찾았으므로 반복 종료
+//                }
+//            }
+//        }
 
         // 디버깅용 로그 출력 (운영환경에서는 제거 권장)
         System.out.println("token = " + token);
 
         // === 2단계: 토큰이 없는 경우 처리 ===
         if (token == null) {
+//        if (token == null || !jwtUtil.validateToken(token)) {
             // JWT 토큰이 없는 경우 인증 없이 다음 필터로 요청 전달
             // 이 경우 SecurityConfig의 설정에 따라 접근 제한이 적용됨
             filterChain.doFilter(request, response);

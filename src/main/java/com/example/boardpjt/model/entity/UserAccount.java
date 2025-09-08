@@ -17,6 +17,7 @@ import lombok.Setter;
 // @Table 어노테이션은 필수가 아니며, 테이블명을 변경하고 싶을 때 사용
 // 예: @Table(name = "MY_USER_ACCOUNT") -> 테이블명을 "MY_USER_ACCOUNT"로 지정
 // 기본적으로는 클래스명을 snake_case로 변환한 "user_account" 테이블명 사용
+@Table(name = "MY_USER_ACCOUNT")
 public class UserAccount {
 
     /**
