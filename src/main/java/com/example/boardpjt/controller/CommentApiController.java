@@ -2,12 +2,15 @@ package com.example.boardpjt.controller;
 
 import com.example.boardpjt.model.dto.CommentDTO;
 import com.example.boardpjt.model.entity.Comment;
+import com.example.boardpjt.model.entity.Post;
 import com.example.boardpjt.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,7 +20,7 @@ public class CommentApiController {
 
     @PostMapping("/{postId}")
     public ResponseEntity<Comment> create(@PathVariable Long postId,
-                                          // JSON body -> 변환
+                                          // JSON Body -> 변환
                                           @RequestBody CommentDTO.Request dto,
                                           Authentication authentication) {
         try {
@@ -41,5 +44,10 @@ public class CommentApiController {
             return ResponseEntity.status(
                     HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<List<Comment>> list(@PathVariable Long postId) {
+        return ResponseEntity.ok(commentService.findByPostId(postId));
     }
 }
