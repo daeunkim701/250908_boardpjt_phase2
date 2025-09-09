@@ -1,0 +1,38 @@
+# JPA, MySQL 관련된 설정
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+      port: ${REDIS_PORT}
+      ssl:
+        enabled: true
+  datasource:
+    # 로컬 MySQL 또는 테스트 DB 연결
+#    url: jdbc:mysql://localhost:3306/boardpjt_dev?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+#    username: dev_user
+#    password: dev_password
+
+    # 또는 클라우드 개발 DB 사용 (Aiven.io 예시)
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      # 개발 환경: 스키마 자동 업데이트
+      # create: 매번 테이블 삭제 후 재생성 (데이터 손실)
+      # create-drop: 애플리케이션 종료 시 테이블 삭제
+      # update: 기존 테이블 유지하면서 스키마 변경사항만 적용 (권장)
+      # validate: 스키마 검증만 수행, 변경하지 않음
+      # none: 아무것도 하지 않음
+      ddl-auto: validate
+
+# JWT 관련된 설정
+jwt:
+  secret: ${JWT_SECRET}
+  expiry:
+#    access: 3600000    # 1시간
+    access: 60000    # 1분
+    refresh: 86400000 # 1일
