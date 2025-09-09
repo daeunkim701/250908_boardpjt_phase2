@@ -23,8 +23,8 @@ public class CommentService {
 
     @Transactional
     public Comment addComment(CommentDTO.Request dto) {
-        // Controller -> authentication 인증 username, dto username
-        // Service -> username 존재하는 유저인 건지 postId는 존재하는 게시물인지
+        // Controller -> authentication 인증 username. dto username?
+        // Service -> username? 존재하는 유저인한건지... postId 존재하는 게시물인지?
         UserAccount user = userAccountRepository.findByUsername(dto.username())
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
         Post post = postRepository.findById(dto.postId())
@@ -43,7 +43,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteByID(Long id) {
+    public void deleteById(Long id) {
         commentRepository.deleteById(id);
     }
 
