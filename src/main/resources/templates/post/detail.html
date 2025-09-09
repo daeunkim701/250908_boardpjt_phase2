@@ -33,10 +33,34 @@
 
     <!-- 댓글 -->
     <section>
+        <h3>댓글</h3>
         <!-- 댓글 작성 (form) -->
+        <form id="commentForm">
+            <textarea id="commentContent" placeholder="댓글을 입력하세요"></textarea>
+            <button>작성</button>
+        </form>
         <!-- 이전 댓글 목록 (list) -->
     </section>
 </section>
+<script th:inline="javascript">
+    // 각각 요소에 대한 지정
+    const commentForm = document.querySelector("#commentForm");
+    const commentContent = document.querySelector("#commentContent");
 
+    commentForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); // 기본 form 작업을 막음
+        await fetch(`/api/comments/[[${post.id}]]`,
+                {
+                "method": "POST",
+                "headers": { "Content-Type": "application/json" },
+                "body": JSON.stringify({
+                    "postId": [[${post.id}]],
+                    "content": commentContent.value,
+                    "username": [[${#authentication.name}]]
+                })
+                });
+
+    })
+</script>
 </body>
 </html>
