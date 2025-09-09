@@ -6,6 +6,9 @@ import com.example.boardpjt.model.entity.UserAccount;
 import com.example.boardpjt.model.repository.PostRepository;
 import com.example.boardpjt.model.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,15 @@ public class PostService {
     public List<Post> findAll() {
         return postRepository.findAll();
     }
+    // 2-1-2. paging & search
+    @Transactional(readOnly = true)
+    public Page<Post> findWithPagingAndSearch(String keyword, int page) {
+        // 키워드 구현은 좀 이따가
+        // 페이징 구현 먼저
+        Pageable pageable = PageRequest.of(page, 5); // 5개까지만 한 페이지에 보임 (5개씩 끊음)
+        return postRepository.findByTitleContainingOrContentContainingOrderByIdDesc(keyword, keyword, pageable);
+    }
+
     // 2-2. findOne (byId...)
     @Transactional(readOnly = true)
     public Post findById(Long id) {
