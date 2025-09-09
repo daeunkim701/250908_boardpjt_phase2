@@ -81,4 +81,16 @@ public class PostController {
         }
         return "redirect:/posts"; // 문제 발생 시 목록으로 보냄
     }
+
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable Long id, Model model, Authentication authentication) {
+        Post post = postService.findById(id);
+        if (!post.getAuthor().getUsername().equals(authentication.getName())) {
+            return "redirect:/posts/" + id; // 권한 없으면 세부 페이지로 이동
+        }
+        // form -> audit 관련 내용은 적지 않을 것.
+        model.addAttribute("post", post); // binding -> form
+        return "post/edit"; // templates/post/edit/html
+    }
+
 }

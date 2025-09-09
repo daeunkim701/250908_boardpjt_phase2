@@ -51,9 +51,20 @@ public class PostService {
 
     // -------------------------
     // 3. update
-    // 4. delete v
+    @Transactional
+    public void updatePost(Long id, PostDTO.Request dto) { // dto: 정말 추가와 관련된 애들을 담음
+        Post post = findById(id); // 없으면 예외처리로 Illegal~
+        // 작성자 != 수정 하려는 사람 인 경우
+        if (!post.getAuthor().getUsername().equals(dto.getUsername())) {
+            throw new SecurityException("작성자만 수정 가능");
+        }
+        post.setTitle(dto.getTitle());
+        post.setContent(dto.getContent());
+        postRepository.save(post);
+    }
 
     // 페이징, 검색 쿼리 -> 내일 오전
+
     // 내일 오후 -> 댓글. (추천/좋아요). 팔로우.
     // 남은 시간. 질답.
 }
